@@ -12,35 +12,35 @@ class MonitorSelector(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
-        # Configuración de la ventana
+        # Window configuration
         self.setWindowTitle("CrosshairUp - Config")
-        self.setGeometry(100, 100, 350, 250)  # Aumenté la altura para agregar el combo de juegos
+        self.setGeometry(100, 100, 350, 250)  # Increased height to add the game combo box
 
-        # Obtener la ruta correcta para los recursos
+        # Get the correct path for resources
         if getattr(sys, 'frozen', False):
-            # Si estamos en un entorno empaquetado (ejecutable)
+            # If we are in a packaged environment (executable)
             base_path = sys._MEIPASS
         else:
-            # Si estamos en el entorno de desarrollo
+            # If we are in the development environment
             base_path = os.path.dirname(__file__)
-        # Establecer el icono de la ventana
+        # Set the window icon
         icon_path = os.path.join(base_path, 'icon', 'icon.png')
         self.setWindowIcon(QIcon(icon_path))
 
-        # Crear y configurar el icono de la bandeja
+        # Create and configure the tray icon
         self.tray_icon = QSystemTrayIcon(self)
         self.tray_icon.setIcon(QIcon(icon_path))
         
-        # Eliminar el botón de maximizar (deja solo los botones de minimizar y cerrar)
+        # Remove the maximize button (leave only minimize and close buttons)
         self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.WindowMinimizeButtonHint)
 
-        # Fijar el tamaño de la ventana para que no sea redimensionable
-        self.setFixedSize(350, 250)  # Tamaño fijo (ancho, alto)
+        # Set the window size to be non-resizable
+        self.setFixedSize(350, 250)  # Fixed size (width, height)
 
-        # Aplicar el tema oscuro de qt-material
+        # Apply qt-material dark theme
         qt_material.apply_stylesheet(QtWidgets.QApplication.instance(), theme='dark_yellow.xml')
 
-        # Cambiar color del texto a blanco usando CSS para etiquetas y combo boxes
+        # Change text color to white using CSS for labels and combo boxes
         self.setStyleSheet("""
             QLabel, QComboBox, QPushButton {
                 color: white;
@@ -55,74 +55,74 @@ class MonitorSelector(QtWidgets.QWidget):
             }
         """)
 
-        # Crear el layout
+        # Create the layout
         layout = QtWidgets.QVBoxLayout()
 
-        # Lista de monitores detectados
+        # List of detected monitors
         self.monitors = get_monitors()
         self.combo_monitor = QtWidgets.QComboBox()
         self.combo_resolution = QtWidgets.QComboBox()
-        self.combo_game = QtWidgets.QComboBox()  # Combo box para seleccionar el juego
+        self.combo_game = QtWidgets.QComboBox()  # Combo box to select the game
 
-        # Agregar los monitores al combo box
+        # Add monitors to the combo box
         for index, monitor in enumerate(self.monitors):
             self.combo_monitor.addItem(f"Monitor {index + 1} - {monitor.name}")
 
-        # Agregar los juegos al combo box
+        # Add games to the combo box
         self.combo_game.addItem("Fortnite")
         self.combo_game.addItem("Left 4 Dead")
 
-        # Seleccionar el monitor principal por defecto
+        # Select the primary monitor by default
         primary_monitor_index = 0
         self.combo_monitor.setCurrentIndex(primary_monitor_index)
 
-        # Añadir los widgets al layout
-        layout.addWidget(QtWidgets.QLabel("Elige el monitor:"))
+        # Add widgets to the layout
+        layout.addWidget(QtWidgets.QLabel("Choose the monitor:"))
         layout.addWidget(self.combo_monitor)
-        layout.addWidget(QtWidgets.QLabel("Elige la resolución:"))
+        layout.addWidget(QtWidgets.QLabel("Choose the resolution:"))
         layout.addWidget(self.combo_resolution)
-        layout.addWidget(QtWidgets.QLabel("Elige el juego:"))
+        layout.addWidget(QtWidgets.QLabel("Choose the game:"))
         layout.addWidget(self.combo_game)
 
-        # Conectar la selección del monitor con la actualización de resoluciones
+        # Connect monitor selection to resolution update
         self.combo_monitor.currentIndexChanged.connect(self.update_resolutions)
-        self.update_resolutions()  # Cargar resoluciones del monitor por defecto
+        self.update_resolutions()  # Load resolutions for the default monitor
 
-        # Botón para iniciar la mira
-        self.start_button = QtWidgets.QPushButton("Iniciar Crosshair")
+        # Button to start the crosshair
+        self.start_button = QtWidgets.QPushButton("Start Crosshair")
         self.start_button.clicked.connect(self.launch_crosshair)
         layout.addWidget(self.start_button)
 
         self.setLayout(layout)
 
     def update_resolutions(self):
-        # Obtener el monitor seleccionado
+        # Get the selected monitor
         selected_monitor = self.monitors[self.combo_monitor.currentIndex()]
         
-        # Limpiar el combo de resoluciones
+        # Clear the resolution combo box
         self.combo_resolution.clear()
 
-        # Usamos QScreen para obtener la resolución del monitor seleccionado
-        screen = QtWidgets.QApplication.primaryScreen()  # Obtener el monitor activo (puedes cambiar esto según el índice seleccionado)
+        # Use QScreen to get the resolution of the selected monitor
+        screen = QtWidgets.QApplication.primaryScreen()  # Get the active monitor (you can change this based on the selected index)
         
-        # Usar screen.geometry() para obtener la resolución máxima soportada
+        # Use screen.geometry() to get the maximum supported resolution
         available_resolutions = [screen.geometry().size()]
 
-        # Añadir las resoluciones al combo box
+        # Add resolutions to the combo box
         for res in available_resolutions:
             self.combo_resolution.addItem(f"{res.width()} x {res.height()}", res)
 
-        # Establecer la resolución actual como seleccionada por defecto
+        # Set the current resolution as selected by default
         current_resolution = QtCore.QSize(selected_monitor.width, selected_monitor.height)
         index = self.combo_resolution.findData(current_resolution)
         self.combo_resolution.setCurrentIndex(index)
 
     def launch_crosshair(self):
-        # Obtener el monitor, resolución y juego seleccionados
+        # Get the selected monitor, resolution, and game
         selected_monitor = self.monitors[self.combo_monitor.currentIndex()]
         selected_resolution = self.combo_resolution.currentData()
         selected_game = self.combo_game.currentText()
 
-        # Crear y mostrar la ventana de Crosshair en la pantalla y resolución seleccionada
+        # Create and show the Crosshair window on the selected screen and resolution
         self.crosshair = CrosshairApp(selected_monitor, selected_resolution, selected_game)
         self.crosshair.show()
