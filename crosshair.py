@@ -10,53 +10,53 @@ class CrosshairApp(QtWidgets.QWidget):
         self.resolution = resolution
         self.game = game
 
-        # Configuración de la ventana de la mira
+        # Crosshair window configuration
         self.setWindowTitle(f"Crosshair for {self.game}")
         self.setGeometry(monitor.x, monitor.y, resolution.width(), resolution.height())
         self.setWindowFlags(
             QtCore.Qt.FramelessWindowHint | 
             QtCore.Qt.WindowStaysOnTopHint | 
             QtCore.Qt.SubWindow |
-            QtCore.Qt.WindowTransparentForInput  # Ignorar eventos de entrada completamente
+            QtCore.Qt.WindowTransparentForInput  # Ignore input events completely
         )
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
-        # Configuración de la mira (crosshair)
-        self.crosshair_size = 20  # Tamaño reducido de la mira para mayor precisión
-        self.crosshair_thickness = 2  # Grosor de las líneas de la mira
-        self.crosshair_color = QColor("green")  # Color de la mira
+        # Crosshair settings
+        self.crosshair_size = 20  # Reduced crosshair size for better accuracy
+        self.crosshair_thickness = 2  # Thickness of the crosshair lines
+        self.crosshair_color = QColor("green")  # Crosshair color
 
         self.setFixedSize(self.crosshair_size * 2, self.crosshair_size * 2)
 
-        # Centrar la mira en la pantalla
+        # Center the crosshair on the screen
         self.center_crosshair()
 
         self.show()
 
     def center_crosshair(self):
-        """Centra la mira en el monitor según la resolución y la posición del monitor."""
+        """Centers the crosshair on the monitor based on resolution and monitor position."""
         monitor_center_x = self.monitor.x + self.monitor.width // 2
         monitor_center_y = self.monitor.y + self.monitor.height // 2
 
-        # Calcular la posición de la mira para que esté centrada
+        # Calculate the position for the crosshair to be centered
         crosshair_center_x = monitor_center_x - self.crosshair_size
         crosshair_center_y = monitor_center_y - self.crosshair_size
 
         self.move(crosshair_center_x, crosshair_center_y)
 
     def paintEvent(self, event):
-        """Dibuja la mira en el centro de la ventana."""
+        """Draws the crosshair at the center of the window."""
         painter = QPainter(self)
         pen = QPen(self.crosshair_color)
         pen.setWidth(self.crosshair_thickness)
         painter.setPen(pen)
 
-        # Dibujar líneas de la mira
+        # Draw crosshair lines
         half_size = self.crosshair_size
-        painter.drawLine(half_size, half_size - 10, half_size, half_size + 10)  # Línea vertical
-        painter.drawLine(half_size - 10, half_size, half_size + 10, half_size)  # Línea horizontal
+        painter.drawLine(half_size, half_size - 10, half_size, half_size + 10)  # Vertical line
+        painter.drawLine(half_size - 10, half_size, half_size + 10, half_size)  # Horizontal line
 
     def keyPressEvent(self, event):
-        """Cerrar la mira cuando presionamos la tecla Esc."""
+        """Close the crosshair when the Esc key is pressed."""
         if event.key() == Qt.Key_Escape:
             self.close()
